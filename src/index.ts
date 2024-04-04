@@ -3,7 +3,6 @@ import { Scene } from './scene';
 import { Camera } from './camera';
 import { WebGpuRenderer } from './renderer'
 
-
 const outputCanvas = document.createElement('canvas')
 outputCanvas.width = window.innerWidth
 outputCanvas.height = window.innerHeight

@@ -1,6 +1,6 @@
-import { device, cameraUniformBuffer, lightDataBuffer } from './renderer';
 import { mat4, vec3 } from 'gl-matrix';
 import { lightDataSize } from './scene';
+import { device, cameraUniformBuffer, lightDataBuffer } from './renderer';
 
 
 const vertices = [
@@ -388,7 +388,22 @@ export class Cube {
     }
 
     public draw(passEncoder: GPURenderPassEncoder, device: GPUDevice) {
-        this.updateTransformationMatrix()
+        // MOVE / TRANSLATE OBJECT
+        const transform = mat4.create();
+        const rotate = mat4.create();
+
+        mat4.translate(transform, transform, vec3.fromValues(this.x, this.y, this.z))
+        mat4.rotateX(transform, transform, this.rotX);
+        mat4.rotateY(transform, transform, this.rotY);
+        mat4.rotateZ(transform, transform, this.rotZ);
+
+        mat4.rotateX(rotate, rotate, this.rotX);
+        mat4.rotateY(rotate, rotate, this.rotY);
+        mat4.rotateZ(rotate, rotate, this.rotZ);
+
+        // APPLY
+        mat4.copy(this.transformMatrix, transform)
+        mat4.copy(this.rotateMatrix, rotate)
 
         passEncoder.setPipeline(this.renderPipeline);
         device.queue.writeBuffer(
@@ -408,25 +423,6 @@ export class Cube {
         passEncoder.setVertexBuffer(0, this.verticesBuffer);
         passEncoder.setBindGroup(0, this.transformationBindGroup);
         passEncoder.draw(vertices.length, 1, 0, 0);
-    }
-
-    private updateTransformationMatrix() {
-        // MOVE / TRANSLATE OBJECT
-        const transform = mat4.create();
-        const rotate = mat4.create();
-
-        mat4.translate(transform, transform, vec3.fromValues(this.x, this.y, this.z))
-        mat4.rotateX(transform, transform, this.rotX);
-        mat4.rotateY(transform, transform, this.rotY);
-        mat4.rotateZ(transform, transform, this.rotZ);
-
-        mat4.rotateX(rotate, rotate, this.rotX);
-        mat4.rotateY(rotate, rotate, this.rotY);
-        mat4.rotateZ(rotate, rotate, this.rotZ);
-
-        // APPLY
-        mat4.copy(this.transformMatrix, transform)
-        mat4.copy(this.rotateMatrix, rotate)
     }
 
     private setTransformation(parameter?: CubeParameter) {
